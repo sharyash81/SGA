@@ -34,7 +34,7 @@ def match_feature_selection(match_json_path):
         match[[col]] = match[[col]].apply(lambda x: xml2json(x[col]), axis = 1, result_type='broadcast')
     for col in xml_cols:
         match = remove_empty_col(match, col,'{}')
-    
+
     # extract goals by each player from xml
     match['goals'] = match[['goal']].apply(lambda x : extract_goal(x['goal']), axis=1 , result_type='broadcast')
 
@@ -49,8 +49,12 @@ def match_feature_selection(match_json_path):
     # remove empty fields
     possible_nan_cols = ['home_pos','away_pos','home_shoton','away_shoton']
     possible_empty_cols = ['goals']
+
+    # remove possible NaN columns 
     for col in possible_nan_cols:
         match = remove_empty_col(match, col, np.NaN)
+
+    # remove possible empty columns
     for col in possible_empty_cols:
         match = remove_empty_col(match, col, json.dumps([]))
     
@@ -75,5 +79,3 @@ if __name__ == '__main__':
     # clean match feauture
     match_feature_selection("jsonCols/Match.json")
     print("***** Data cleaned Successfully")
-
-

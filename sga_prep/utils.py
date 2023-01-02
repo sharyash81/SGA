@@ -65,12 +65,20 @@ def extract_goal(goals:str):
     goals = []
     try:            
         for goal in json_object['goal']['value']:
-            goals.append((goal['player2'],goal['player1']))
+
+            # find scorer
+            if goal.__contains__('player1'):
+                scorer = goal['player1']
+            else :
+                scorer = np.NaN
+            
+            # find assister
+            if goal.__contains__('player2'):
+                assister = goal['player2']
+            else :
+                assister = np.NaN
+            
+            goals.append((scorer,assister))
         return json.dumps(goals)
     except:
         return json.dumps([])
-    
-
-        
-    
-
