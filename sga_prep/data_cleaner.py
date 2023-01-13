@@ -35,9 +35,9 @@ def match_feature_selection(match_json_path):
     for col in xml_cols:
         match = remove_empty_col(match, col,'{}')
 
-    # extract goals by each player from xml
-    match['goals'] = match[['goal']].apply(lambda x : extract_goal(x['goal']), axis=1 , result_type='broadcast')
 
+    # extract goals by each player from xml
+    match['goals'] = match[['goal','home_team_api_id','away_team_api_id']].apply(lambda x : extract_goal(x['goal'],x['home_team_api_id'],x['away_team_api_id']), axis=1 , result_type='expand')
     # extract shots on target from xml
     match[['home_shoton','away_shoton']] = match[['shoton','home_team_api_id','away_team_api_id']].apply(
         lambda x : extract_shot(x['shoton'],x['home_team_api_id'],x['away_team_api_id']), axis=1 , result_type='expand')
@@ -57,7 +57,6 @@ def match_feature_selection(match_json_path):
     # remove possible empty columns
     for col in possible_empty_cols:
         match = remove_empty_col(match, col, json.dumps([]))
-    
     # result match collection
     result_match = match[['match_api_id','home_team_api_id','away_team_api_id','season','date',
     'country_id','league_id','home_team_goal','away_team_goal','home_shoton','away_shoton','home_pos','away_pos','goals']]
@@ -79,3 +78,6 @@ if __name__ == '__main__':
     # clean match feauture
     match_feature_selection("jsonCols/Match.json")
     print("***** Data cleaned Successfully")
+
+
+
