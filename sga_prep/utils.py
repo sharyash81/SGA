@@ -2,7 +2,7 @@ import xmltodict
 import json
 import numpy as np
 import pandas as pd
-
+import collections
 
 # convert xml to json 
 def xml2json(xml):
@@ -59,26 +59,42 @@ def extract_shot(shoton:str, home_team_id:str , away_team_id:str):
     except:
         return np.NaN,np.NaN
 
-# extract each goal 
-def extract_goal(goals:str):
-    json_object = json.loads(goals)
-    goals = []
-    try:            
-        for goal in json_object['goal']['value']:
-
-            # find scorer
-            if goal.__contains__('player1'):
-                scorer = goal['player1']
-            else :
-                scorer = np.NaN
-            
-            # find assister
-            if goal.__contains__('player2'):
-                assister = goal['player2']
-            else :
-                assister = np.NaN
-            
-            goals.append((scorer,assister))
-        return json.dumps(goals)
+# extract scorer and assister from single goal 
+def extract_single_goal(goal):
+    if goal.__contains__('player1'):
+        scorer = goal['player1']
+    else :
+        scorer = np.NaN
+    
+    # find assister
+    if goal.__contains__('player2'):
+        assister = goal['player2']
+    else :
+        assister = np.NaN
+    return (scorer,assister)
+                
+# extract each goal informat
+def extract_goal(res_goals:str , home_team_api_id , away_team_api_id):
+    json_object = json.loads(res_goals)
+    res_goals = {key:[] for key in [str(home_team_api_id),str(away_team_api_id)]}
+    try:
+        goals = json_object['goal']['value']
     except:
+        return json.dumps([])
+
+    if (goals is None ): 
+        return json.dumps([])
+    elif (isinstance(goals, list)):
+        try:
+            for goal in goals:
+                res_goals[goal['team']].append(extract_single_goal(goal))
+            return json.dumps(res_goals)
+        except:
+            return json.dumps([])
+    elif (isinstance(goals, dict)):
+        try:
+            res_goals[goals['team']].append(extract_single_goal(goals))
+        except:
+            return json.dumps([])
+    else:
         return json.dumps([])
